@@ -24,7 +24,7 @@ export default function Home() {
     (async () => {
       const { data: t } = await supabase.from('testimonials').select('*').eq('is_active', true).order('sort_order').limit(4);
       setTestimonials(t || []);
-      const { data: p } = await supabase.from('portfolio_items').select('*').eq('is_active', true).eq('is_featured', true).order('sort_order').limit(6);
+      const { data: p } = await supabase.from('portfolio_items').select('*').eq('is_active', true).order('sort_order').limit(6);
       setPortfolio(p || []);
     })();
   }, []);
