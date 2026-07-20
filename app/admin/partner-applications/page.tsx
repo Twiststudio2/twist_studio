@@ -83,14 +83,40 @@ export default function PartnerApplicationsPage() {
     setLoading(true);
     const { data, error } = await supabase
       .from('partner_applications')
-      .select('*, profile:profiles!user_id(email, full_name, role)')
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (error) {
       toast.error('Failed to load partner applications');
-    } else {
-      setApplications((data || []) as unknown as ApplicationRow[]);
+      setLoading(false);
+      return;
     }
+
+    const applicationsData = (data || []) as ApplicationRow[];
+    const userIds = Array.from(new Set(applicationsData.map((app) => app.user_id).filter(Boolean)));
+
+    if (userIds.length > 0) {
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, role')
+        .in('id', userIds);
+
+      if (profilesError) {
+        toast.error('Failed to load related user profiles');
+      } else {
+        const profileMap = Object.fromEntries((profiles || []).map((profile) => [profile.id, profile]));
+        setApplications(
+          applicationsData.map((app) => ({
+            ...app,
+            profile: profileMap[app.user_id] || null,
+          }))
+        );
+        setLoading(false);
+        return;
+      }
+    }
+
+    setApplications(applicationsData);
     setLoading(false);
   }, []);
 
@@ -133,15 +159,15 @@ export default function PartnerApplicationsPage() {
       return;
     }
 
-    // Update profile role to partner if not already
-    if (app.profile && app.profile.role !== 'partner') {
+    // Update profile role and activate partner account
+    if (app.profile) {
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ role: 'partner', updated_at: new Date().toISOString() })
+        .update({ role: 'partner', status: 'active', updated_at: new Date().toISOString() })
         .eq('id', app.user_id);
 
       if (profileError) {
-        toast.error('Application approved, but failed to update user role');
+        toast.error('Application approved, but failed to activate partner account');
       }
     }
 

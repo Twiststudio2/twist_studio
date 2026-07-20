@@ -71,7 +71,7 @@ function SignupInner() {
         email,
         full_name: fullName,
         role,
-        status: 'active',
+        status: role === 'partner' ? 'deactivated' : 'active',
         ...(role === 'partner' && referrerId ? { recruited_by_hr_id: referrerId } : {}),
       });
 

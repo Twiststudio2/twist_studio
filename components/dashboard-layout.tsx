@@ -178,7 +178,12 @@ export function ProtectedRoute({ role, children }: { role: 'admin' | 'partner' |
   }
 
   const userRole = normalizeRole(profile?.role);
-  if (profile && userRole !== role) {
+  if (profile && (userRole !== role || profile.status !== 'active')) {
+    if (userRole === 'partner' && profile.status !== 'active') {
+      router.push('/apply/partner');
+      return null;
+    }
+
     const dash: Record<string, string> = { admin: '/admin', partner: '/partner', creative: '/creative', hr: '/hr' };
     router.push((userRole && dash[userRole]) || '/');
     return null;

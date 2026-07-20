@@ -347,14 +347,14 @@ export default function ClientsAdminPage() {
               </div>
 
               <div className="space-y-2">
-                <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Services Needed</div>
+                <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Work / Services Needed</div>
                 <div className="rounded-lg border border-border/60 bg-muted/30 p-3 text-sm">
                   {selected.services_needed || '—'}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Additional Notes</div>
+                <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Project Description</div>
                 <div className="rounded-lg border border-border/60 bg-muted/30 p-3 text-sm">
                   {selected.additional_notes || '—'}
                 </div>

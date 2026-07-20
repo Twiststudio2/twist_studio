@@ -385,6 +385,7 @@ export default function PartnersAdminPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <DetailField label="Email" value={selected.email} />
                     <DetailField label="Phone" value={selected.phone} />
+                    <DetailField label="Status" value={selected.status} />
                     <DetailField label="Clients Referred" value={selected.client_count} />
                     <DetailField label="Joined" value={formatDate(selected.created_at)} />
                   </div>

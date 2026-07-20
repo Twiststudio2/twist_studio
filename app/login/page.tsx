@@ -63,9 +63,15 @@ export default function LoginPage() {
         .maybeSingle();
       if (profileError) throw profileError;
 
-      if (profile?.status === 'suspended') {
-        toast.error('Your account has been suspended. Contact support.');
-        await supabase.auth.signOut();
+      if (profile?.status !== 'active') {
+        if (normalizeRole(profile?.role) === 'partner') {
+          toast.error('Your partner account is not active yet. Complete your application to get access.');
+          router.push('/apply/partner');
+        } else {
+          toast.error('Your account is not active. Contact support.');
+          await supabase.auth.signOut();
+          router.push('/login');
+        }
         setLoading(false);
         return;
       }

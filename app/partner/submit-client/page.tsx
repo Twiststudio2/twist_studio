@@ -188,39 +188,38 @@ export default function SubmitClientPage() {
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5">
                 <FileText className="h-3.5 w-3.5 text-primary" />
-                Services Needed
-              </Label>
-              <Select
-                value={form.services_needed || undefined}
-                onValueChange={(v) => handleChange('services_needed', v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a service category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SERVICES_CATEGORIES.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                  Work / Services Needed
+                </Label>
+                <Select
+                  value={form.services_needed || undefined}
+                  onValueChange={(v) => handleChange('services_needed', v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select the type of work or service" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SERVICES_CATEGORIES.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* Additional Notes */}
-            <div className="space-y-2">
-              <Label htmlFor="additional_notes" className="flex items-center gap-1.5">
-                <FileText className="h-3.5 w-3.5 text-primary" />
-                Additional Notes
-              </Label>
-              <Textarea
-                id="additional_notes"
-                placeholder="Any extra details about the client or their project requirements…"
-                rows={4}
-                value={form.additional_notes}
-                onChange={(e) => handleChange('additional_notes', e.target.value)}
-              />
-            </div>
+              {/* Project Description */}
+              <div className="space-y-2">
+                <Label htmlFor="additional_notes" className="flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5 text-primary" />
+                  Project Description
+                </Label>
+                <Textarea
+                  id="additional_notes"
+                  placeholder="Describe the client project and work to be done..."
+                  value={form.additional_notes}
+                  onChange={(e) => handleChange('additional_notes', e.target.value)}
+                />
+              </div>
 
             <div className="flex items-center justify-end gap-3 pt-2">
               <Button
