@@ -162,6 +162,8 @@ export function StatCard({ icon: Icon, label, value, color = 'primary' }: { icon
   );
 }
 
+const normalizeRole = (role?: string) => role?.toLowerCase().trim();
+
 export function ProtectedRoute({ role, children }: { role: 'admin' | 'partner' | 'creative' | 'hr'; children: React.ReactNode }) {
   const { user, profile, loading } = useAuth();
   const router = useRouter();
@@ -175,9 +177,10 @@ export function ProtectedRoute({ role, children }: { role: 'admin' | 'partner' |
     return null;
   }
 
-  if (profile && profile.role !== role) {
+  const userRole = normalizeRole(profile?.role);
+  if (profile && userRole !== role) {
     const dash: Record<string, string> = { admin: '/admin', partner: '/partner', creative: '/creative', hr: '/hr' };
-    router.push(dash[profile.role] || '/');
+    router.push((userRole && dash[userRole]) || '/');
     return null;
   }
 

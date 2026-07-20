@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,34 +11,14 @@ import { useAuth } from '@/lib/auth-context';
 import { formatCurrency, formatDateTime } from '@/lib/data';
 
 export default function HrOverview() {
-  const router = useRouter();
-  const { user, profile, loading } = useAuth();
+  const { profile } = useAuth();
   const [stats, setStats] = useState({ partners: 0, activePartners: 0, totalCommission: 0, pendingCommission: 0, paidCommission: 0 });
   const [recentPartners, setRecentPartners] = useState<any[]>([]);
   const [recentCommissions, setRecentCommissions] = useState<any[]>([]);
-  const [loadingData, setLoadingData] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.push('/login');
-        return;
-      }
-      if (profile) {
-        if (profile.role === 'admin') {
-          router.push('/admin');
-          return;
-        }
-        if (profile.role !== 'hr') {
-          router.push('/');
-          return;
-        }
-      }
-    }
-  }, [loading, user, profile, router]);
-
-  useEffect(() => {
-    if (!profile?.id || profile.role !== 'hr') return;
+    if (!profile?.id) return;
     (async () => {
       const [partners, commissions] = await Promise.all([
         supabase.from('profiles').select('*').eq('recruited_by_hr_id', profile.id).order('created_at', { ascending: false }),
@@ -59,7 +37,7 @@ export default function HrOverview() {
       });
       setRecentPartners(partnerList.slice(0, 5));
       setRecentCommissions(commList.slice(0, 5));
-      setLoadingData(false);
+      setLoading(false);
     })();
   }, [profile?.id]);
 
@@ -72,9 +50,9 @@ export default function HrOverview() {
           <h2 className="text-2xl font-bold">Welcome, {profile?.full_name || 'HR Manager'}</h2>
           <p className="text-muted-foreground">Manage your recruited partners and track your commissions.</p>
         </div>
-        <Link href="/hr/recruit">
-          <Button size="sm" className="whitespace-nowrap">Recruit a Partner</Button>
-        </Link>
+        <Button asChild size="sm" className="whitespace-nowrap">
+          <a href="/hr/recruit">Recruit a Partner</a>
+        </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

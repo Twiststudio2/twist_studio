@@ -12,6 +12,8 @@ import { ArrowLeft, Mail, Lock, Loader as Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
+const normalizeRole = (role?: string) => role?.toLowerCase().trim();
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -19,40 +21,66 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        (async () => {
-          const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
-          if (profile?.role === 'admin') router.push('/admin');
-          else if (profile?.role === 'partner') router.push('/partner');
-          else if (profile?.role === 'creative') router.push('/creative');
-          else if (profile?.role === 'hr') router.push('/hr');
-        })();
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Session fetch error:', error);
+          return;
+        }
+        if (session) {
+          const { data: profile, error: profileError } = await supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+          if (profileError) {
+            console.error('Profile fetch error:', profileError);
+            return;
+          }
+          const role = normalizeRole(profile?.role);
+          if (role === 'admin') router.push('/admin');
+          else if (role === 'partner') router.push('/partner');
+          else if (role === 'creative') router.push('/creative');
+          else if (role === 'hr') router.push('/hr');
+        }
+      } catch (err) {
+        console.error('Error checking session:', err);
       }
-    });
+    };
+
+    checkSession();
   }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    if (data.user) {
-      const { data: profile } = await supabase.from('profiles').select('role, status').eq('id', data.user.id).maybeSingle();
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      if (!data.user) throw new Error('Login failed. Please try again.');
+
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role, status')
+        .eq('id', data.user.id)
+        .maybeSingle();
+      if (profileError) throw profileError;
+
       if (profile?.status === 'suspended') {
         toast.error('Your account has been suspended. Contact support.');
         await supabase.auth.signOut();
+        setLoading(false);
         return;
       }
+
       toast.success('Welcome back!');
-      if (profile?.role === 'admin') router.push('/admin');
-      else if (profile?.role === 'partner') router.push('/partner');
-      else if (profile?.role === 'creative') router.push('/creative');
+      const role = normalizeRole(profile?.role);
+      if (role === 'admin') router.push('/admin');
+      else if (role === 'partner') router.push('/partner');
+      else if (role === 'creative') router.push('/creative');
+      else if (role === 'hr') router.push('/hr');
       else router.push('/');
+    } catch (error: any) {
+      toast.error(error?.message || 'Login failed. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
     }
   };
 

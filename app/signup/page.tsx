@@ -59,23 +59,19 @@ function SignupInner() {
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName, role } },
-    });
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) {
       setLoading(false);
       toast.error(error.message);
       return;
     }
     if (data.user) {
-      await supabase.from('profiles').insert({
+      await supabase.from('profiles').upsert({
         id: data.user.id,
         email,
         full_name: fullName,
         role,
-        status: role === 'admin' ? 'active' : 'active',
+        status: 'active',
         ...(role === 'partner' && referrerId ? { recruited_by_hr_id: referrerId } : {}),
       });
 
